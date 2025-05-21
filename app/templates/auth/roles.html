@@ -1,0 +1,29 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<h4 class="text-center">Manage Roles</h4>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Role Name</th>
+          <th>Description</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for role in roles %}
+        <tr>
+          <td>{{role.role_name}}</td>
+          <td>{{role.description}}</td>
+          <td><a href="{{url_for('auth.edit_role', role_id= role.role_id) }}"> <button class="btn btn-primary">Edit</button></a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="text-center"><a href="{{url_for('auth.add_role')}}"><button class="btn btn-primary">New Role</button></div></a>
+  </div>
+{% endblock %}

@@ -1,0 +1,51 @@
+.container {
+    --bs-gutter-x: 0rem !important;
+}
+
+#login {
+    max-width: 500px;
+}
+
+.upload-table {
+    display: flex;
+}
+.flex-1 {
+    flex: 1;
+}
+
+.flex-2 {
+    flex: 2;
+}
+
+.mb-10{
+    margin-bottom: 10px;
+}
+
+.mb-20{
+    margin-bottom: 20px;
+}
+
+.mb-30{
+    margin-bottom: 30px;
+}
+
+.mb-40{
+    margin-bottom: 40px;
+}
+
+.danger {
+    color: red;
+    font-weight: bold;
+}
+
+.navbar-expand-lg .navbar-collapse {
+        justify-content: flex-end;
+}
+
+.active {
+    display: block;
+}
+
+#submit {
+    padding: 10px 50px;
+}

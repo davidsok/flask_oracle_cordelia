@@ -1,0 +1,30 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<div class="container-fluid text-center">
+  <h4 class="text-center">Update Weekly POS Data</h4>
+  <h6>Last Updated Report Week: {{latest_week['reportstartingdate'].strftime('%m/%d/%Y')}} to {{latest_week['reportendingdate'].strftime('%m/%d/%Y')}}</h6>
+ <ul class="list-group list-group-numbered">
+ </ul>
+  <ul class="list-group list-group-numbered">
+    <li class="mb-5">
+    <form method="post" action="{{ url_for('po.update_weekly_pos_data', query_id=1) }}">
+      <button class="btn btn-primary" type="submit">Update Weekly POS for HOMEDEPOT CANADA</button>
+    </form>
+  </li>
+    <li class="mb-5">
+    <form method="post" action="{{ url_for('po.update_weekly_pos_data', query_id=2) }}">
+      <button class="btn btn-primary" type="submit">Update Weekly POS for HOMEDEPOT US DI</button>
+    </form>
+  </li>
+    <li class="mb-5">
+    <form method="post" action="{{ url_for('po.update_weekly_pos_data', query_id=3) }}">
+      <button class="btn btn-primary" type="submit">Update Weekly POS for HOMEDEPOT US DOM</button>
+    </form>
+  </li>
+  </ul>
+</div>
+{% endblock %}

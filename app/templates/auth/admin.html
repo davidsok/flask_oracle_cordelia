@@ -1,0 +1,26 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<h4 class="text-center">Admin Home Page</h4>
+<div class="container-fluid">
+  <hr>
+    <div class="row mb-30">
+        <div class="col-sm text-center">
+          <a href="{{url_for('auth.users')}}"><img src="{{url_for('static', filename='img/users.png')}}" alt=""><br/>All Users</a>
+        </div>
+        <div class="col-sm text-center">
+            <a href="{{url_for('auth.roles')}}"><img src="{{url_for('static', filename='img/roles.png')}}" alt=""><br/>All Roles</a>
+        </div>
+        <div class="col-sm text-center">
+          <a href="{{url_for('auth.modules')}}"><img src="{{url_for('static', filename='img/modules.png')}}" alt=""><br/>All Modules</a>
+        </div>
+        
+    </div>
+  
+
+  </div>
+</div>
+{% endblock %}

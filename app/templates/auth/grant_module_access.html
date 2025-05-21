@@ -1,0 +1,27 @@
+<!-- templates/auth/register.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<div class="mb-30"></div>
+<h4 class="text-center">Grant Access to {{grantee_user['user_name']}} - {{grantee_user['full_name']}}</h4>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="module_id">{{ form.module_id.label }}</label>
+        {{ form.module_id(class="form-control") }}
+    </div>
+    <div class="form-group">
+        <label for="read_access">{{ form.read_access.label }}</label>
+        {{ form.read_access(class="form-control") }}
+    </div>
+    <div class="form-group">
+        <label for="write_access">{{ form.write_access.label }}</label>
+        {{ form.write_access(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.submit(class="btn btn-primary btn-block") }}
+    </div>
+</form>
+{% endblock %}

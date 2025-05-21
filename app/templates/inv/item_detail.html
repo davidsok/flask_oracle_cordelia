@@ -1,0 +1,96 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <hr>
+  <h4 class="mb-3"><span class="danger">Item Number:</span> {{item['item_number']}}</h4>
+  <h6>Description: {{item['description']}}</h6>
+  <div class="mt-3">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button"
+          role="tab" aria-controls="main" aria-selected="true">Main</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button"
+          role="tab" aria-controls="inventory" aria-selected="false">Inventory</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="po-tab" data-bs-toggle="tab" data-bs-target="#po" type="button"
+          role="tab" aria-controls="po" aria-selected="false">Purchase Order</button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <tbody>
+              <tr>
+                <td>Item Status: {{item['inventory_item_status_code']}}</td>
+                <td>Locator: {{item['locator']}}</td>
+              </tr>
+              <tr>
+                <td>Item Type: {%if item['item_type'] == 'FG'%} 
+                        Finished Goods 
+                  {% elif item['item_type'] == 'K' %}
+                        Kit
+                  {% elif item['item_type'] == 'P' %}
+                        Parts
+                  {% elif item['item_type'] == 'SA' %}
+                        Sample
+                  {% endif %}
+                </td>
+                <td>Unit Of Measure: {{item['primary_uom_code']}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+        <div class="tab-pane fade" id="inventory" role="tabpanel" aria-labelledby="inventory-tab">
+          <table class="table table-hover">
+            <thead>
+              <th>SubInv</th>
+              <th>Locator</th>
+              <th>On-hand Qty</th>
+              <th>Allocated Qty</th>
+              <th>Available Qty</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td>FG</td>
+                <td>{{item['locator']}}</td>
+                <td>{{fg_oh_qty['qty']}}</td>
+                <td>{{fg_allocated_qty['qty']}}</td>
+                <td>{{fg_available_qty['qty']}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="po" role="tabpanel" aria-labelledby="po-tab">
+                    <table class="table table-hover">
+            <thead>
+              <th>SubInv</th>
+              <th>Locator</th>
+              <th>On-hand Qty</th>
+              <th>Allocated Qty</th>
+              <th>Available Qty</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{% if fg_oh_qty['qty'] > 0 %} FG {% endif %}</td>
+                <td>{% if fg_oh_qty['qty'] > 0 %}{{item['locator']}} {% endif %}</td>
+                <td>{{fg_oh_qty['qty']}}</td>
+                <td>{{fg_allocated_qty['qty']}}</td>
+                <td>{{fg_available_qty['qty']}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}

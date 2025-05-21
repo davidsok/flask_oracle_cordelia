@@ -1,0 +1,33 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h4 class="text-center">Upload Weekly $ Ad Spent</h4>
+  <ul class="list-group list-group-numbered">
+    <li class="list-group-item"><span class="danger">Step 1:</span> Download Template
+      <div class="mb-20"><a href="{{url_for('static', filename='temp/WEEKLY_AD_SPENT.csv')}}">Download
+          Template</a></div>
+
+    </li>
+
+    <li class="list-group-item"><span class="danger">Step 2:</span> Fill out the template</li>
+    <li class="list-group-item"><span class="danger">Step 3:</span> Upload the file
+      <form class="row" method="POST" enctype="multipart/form-data">
+        <div class="upload-table">
+          <div class="input-group">
+            <input type="file" name="file" class="form-control" id="inputGroupFile04"
+              aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+            <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
+          </div>
+        </div>
+
+      </form>
+    </li>
+  </ul>
+
+
+</div>
+{% endblock %}

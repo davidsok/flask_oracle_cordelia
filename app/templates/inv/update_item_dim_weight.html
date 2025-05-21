@@ -1,0 +1,16 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+    <h1>Your Data</h1>
+
+    <h2>File Name: {{file_name}}.csv</h2>
+    {{ data | safe }}
+    <a href="{{url_for('inv.update_item_dim_weight', file_name=file_name)}}"><button>Update All Item Dimensions & Weight</button></a>
+    <a href="/upload"><button>Back to Upload</button></a>
+    <hr>
+    <div>
+    </div>
+    {% endblock %}

@@ -1,0 +1,8 @@
+{% if g.breadcrumbs %}
+<nav>
+    {% for crumb in g.breadcrumbs %}
+        <a href="{{ crumb.url }}">{{ crumb.text }}</a>
+        {% if not loop.last %} &gt; {% endif %}
+    {% endfor %}
+</nav>
+{% endif %}

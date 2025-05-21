@@ -1,0 +1,33 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<h4 class="text-center">Manage Users</h4>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>User Name</th>
+          <th>Email</th>
+          <th>User Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for each_user in users %}
+        <tr>
+          <td>{{each_user.user_name}}</td>
+          <td>{{each_user.email}}</td>
+          <td>{% if each_user.active_flag == 'Y' %} Active {% else %} Inactive {% endif %}</td>
+          <td>
+            <a href="{{url_for('auth.edit_user', user_id= each_user.user_id) }}"> <button class="btn btn-primary">Edit</button></a>
+            <a href="{{url_for('auth.user_module_access', user_id=each_user.user_id) }}"> <button class="btn btn-primary">View User Module Access</button></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

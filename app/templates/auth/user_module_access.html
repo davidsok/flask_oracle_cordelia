@@ -1,0 +1,33 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<h4 class="text-center">Manage Module Access for: <span class="danger"> {{user['user_name']}} - {{user['full_name']}}</span></h4>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Module Name</th>
+          <th>Description</th>
+          <th>Read Access</th>
+          <th>Write Access</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for access in module_access %}
+        <tr>
+          <td>{{access.module_name}}</td>
+          <td>{{access.description}}</td>
+          <td>{{access.read_access}}</td>
+          <td>{{access.write_access}}</td>
+          <td><a href="{{url_for('auth.edit_module_access', access_id= access.access_id) }}"> <button class="btn btn-primary">Edit</button></a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="text-center"><a href="{{url_for('auth.grant_module_access', grantee=user['user_id'])}}"><button class="btn btn-primary">Grant New Module Access</button></div></a>
+  </div>
+{% endblock %}

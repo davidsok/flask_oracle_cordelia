@@ -1,0 +1,35 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <hr>
+      <div class="row mb-30">
+          {% if user_access['read_access'] == 'Y' %}
+          <div class="col-sm text-center">
+            <a href="{{url_for('po.purchase_orders')}}"><img src="{{url_for('static', filename='img/po.png')}}" alt=""><br/>PO Inquiry</a>
+          </div>
+          {% endif %}
+          {% if user_access['write_access'] == 'Y' %}
+          <div class="col-sm text-center">
+              <a href="{{url_for('po.weekly_pos_data')}}"><img src="{{url_for('static', filename='img/ad.png')}}" alt=""><br/>Weekly POS Data</a>
+          </div>
+          {% endif %}
+      </div>
+      <div class="row mb-30">
+        <div class="col-sm text-center">
+          
+        </div>
+        <div class="col-sm text-center">
+            
+        </div>
+        <div class="col-sm text-center">
+            
+        </div>
+    </div>
+    </div>
+  </div>
+{% endblock %}
