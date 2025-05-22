@@ -1,3 +1,4 @@
+from datetime import timedelta
 import cx_Oracle
 from config import Config
 import pyodbc
@@ -34,18 +35,53 @@ def get_existing_pos_week(payment_vendor):
         'payment_vendor': payment_vendor
     }
     query = """
-        SELECT MAX(FORECASTPERIOD) max_forecastperiod FROM XXPOS_POS_RAW WHERE PAYMENT_VENDOR_NBR = :payment_vendor
+        SELECT MAX(FORECASTPERIOD) max_forecastperiod FROM XXJWY.XXPOS_POS_RAW WHERE PAYMENT_VENDOR_NBR = :payment_vendor
         """
     return execute_query(query=query, bind_vars=bind_vars, fetch='one')
 
 def get_all_existing_pos_week():
     query = """
-        SELECT REPORTSTARTINGDATE, REPORTENDINGDATE 
-        FROM XXPOS_HD_FISCAL_CALENDAR 
+        SELECT FORECASTWEEKLONG, REPORTSTARTINGDATE, REPORTENDINGDATE 
+        FROM XXJWY.XXPOS_HD_FISCAL_CALENDAR 
         WHERE FORECASTPERIOD = (SELECT MAX(FORECASTPERIOD) FROM XXPOS_POS_RAW)
         """
     return execute_query(query=query, fetch='one')
 
+def get_none_existing_pos_week(payment_vendor):
+    bind_vars = {
+        'payment_vendor': payment_vendor
+    }
+    query = """
+        SELECT FORECASTPERIOD, FORECASTWEEKLONG, REPORTSTARTINGDATE, REPORTENDINGDATE FROM XXJWY.XXPOS_HD_FISCAL_CALENDAR WHERE FORECASTPERIOD NOT IN
+        (SELECT DISTINCT FORECASTPERIOD FROM XXJWY.XXPOS_POS_RAW WHERE PAYMENT_VENDOR_NBR = :payment_vendor)
+        ORDER BY FORECASTPERIOD DESC
+        """
+    return execute_query(query=query, bind_vars=bind_vars, fetch='all')
+
+def get_forecastperiod_by_pvendor(forecastperiod, payment_vendor):
+    bind_vars = {
+        'forecastperiod': forecastperiod,
+        'payment_vendor' : payment_vendor
+    }
+    query = """
+        SELECT DISTINCT XHFC.FORECASTPERIOD, XHFC.FORECASTWEEKLONG, XHFC.REPORTSTARTINGDATE, XHFC.REPORTENDINGDATE 
+        FROM XXJWY.XXPOS_HD_FISCAL_CALENDAR xhfc, XXPOS_POS_RAW xpr 
+        WHERE xhfc.forecastperiod = xpr.forecastperiod
+        AND xpr.forecastperiod = :forecastperiod
+        AND xpr.payment_vendor_nbr = :payment_vendor
+        """
+    return execute_query(query=query, bind_vars=bind_vars, fetch='one')
+
+def get_report_end_date(forecastperiod):
+    bind_vars = {
+        'forecastperiod': forecastperiod
+    }
+    query = """
+        SELECT REPORTENDINGDATE 
+        FROM XXJWY.XXPOS_HD_FISCAL_CALENDAR 
+        where FORECASTPERIOD = :forecastperiod
+        """
+    return execute_query(query=query, bind_vars=bind_vars, fetch='one')
 
 def execute_query(query, bind_vars=None, fetch='one', size=None):
     """
@@ -91,8 +127,12 @@ def insert_into_oracle(df, table_name, columns):
     """
     Insert DataFrame into Oracle using executemany().
     """
-    conn = cx_Oracle.connect(Config.ORACLE_USER, Config.ORACLE_PASSWORD, Config.ORACLE_DSN)
+    try:
+        conn = cx_Oracle.connect(Config.ORACLE_USER, Config.ORACLE_PASSWORD, Config.ORACLE_DSN)
+    except Exception as conn_err:
+        return False, "Database connection failed"
     cursor = conn.cursor()
+    
     try:
         # Build dynamic SQL: INSERT INTO table_name (col1, col2, col3) VALUES (:1, :2, :3)
         value_list = ', '.join([f":{i+1}" for i in range(len(columns))])
@@ -101,21 +141,15 @@ def insert_into_oracle(df, table_name, columns):
 
         # Convert DataFrame to list of tuples for the columns
         print(df['payment_vendor_nbr'].head(1).to_list())
-        max_forecastperiod = get_existing_pos_week(df['payment_vendor_nbr'].head(1).to_list()[0])
-        print(max_forecastperiod)
-        if 'max_forecastperiod' in max_forecastperiod:
-            if int(df['forecastperiod'].head(1).to_list()[0]) > int(max_forecastperiod['max_forecastperiod']):
-                df['processtime'] = pd.to_datetime(df['processtime'], errors='coerce')
-                df = df.astype(object).where(pd.notnull(df), None)
-                data = [tuple(row[col] for col in columns) for _, row in df.iterrows()]
-                # Execute batch insert
-                cursor.executemany(sql, data)
-                conn.commit()
-                return True, None
-            else:
-                return False, str('Data Exist!')
+        forecastperiod = get_forecastperiod_by_pvendor(df['forecastperiod'].head(1).to_list()[0], df['payment_vendor_nbr'].head(1).to_list()[0])
+        print('FORECASTPERIOD', forecastperiod)
+        if forecastperiod:
+            return False, 'Data Exist!'
         else:
-            df['processtime'] = pd.to_datetime(df['processtime'], errors='coerce')
+            process_time = get_report_end_date(forecastperiod=df['forecastperiod'].head(1).to_list()[0])
+            print('PROCESSTIME', process_time)
+            df['processtime'] = pd.to_datetime(process_time['reportendingdate'] + timedelta(days=2), errors='coerce')
+            # df['processtime'] = pd.to_datetime(df['processtime'], errors='coerce')
             df = df.astype(object).where(pd.notnull(df), None)
             data = [tuple(row[col] for col in columns) for _, row in df.iterrows()]
             # Execute batch insert
@@ -129,11 +163,11 @@ def insert_into_oracle(df, table_name, columns):
         cursor.close()
         conn.close()
 
-def query_set_ca():
+def query_set_ca_last_week():
     conn = pyodbc.connect(f"DSN={Config.CLOUDERA_DSN_CA_14487}", autocommit=True)
     query = """
         SELECT date_format(current_date, 'MM/dd/yyyy') AS PROCESSTIME,
-        substr(`CA_VENDORDRILL`.`h_sw_short_week`,(-1)*6) AS FORECASTPERIOD,
+        substr(`CA_VENDORDRILL`.`h_sw_short_week`, -6) AS FORECASTPERIOD,
         `CA_VENDORDRILL`.`h_v_payment_vendor_nbr` AS PAYMENT_VENDOR_NBR,
         `CA_VENDORDRILL`.`h_v_merch_vendor_nbr` AS MERCH_VENDOR_NBR,
         `CA_VENDORDRILL`.`h_v_vendor` AS MERCH_VENDOR,
@@ -157,28 +191,28 @@ def query_set_ca():
     conn.close()
     return df
 
-def query_set_us_di():
+def query_set_us_di_last_week():
     conn = pyodbc.connect(f"DSN={Config.CLOUDERA_DSN_US_DI_12746}", autocommit=True)
     query = """
         SELECT 
         date_format(current_date, 'MM/dd/yyyy') AS PROCESSTIME,
-        SUBSTR(`VendorDrill`.`Short_Week`, (-1)*6) AS FORECASTPERIOD,
-        `VendorDrill`.`Category_2` AS category,
-        `VendorDrill`.`Merch_Vendor2` AS MERCH_VENDOR,
+        SUBSTR(`VendorDrill`.`Short_Week`, -6) AS FORECASTPERIOD,
+        `VendorDrill`.`Payment_Vendor_Nbr` AS PAYMENT_VENDOR_NBR,
         `VendorDrill`.`Merch_Vendor_Nbr` AS MERCH_VENDOR_NBR,
-        `VendorDrill`.`Model_Number` AS model_number,
-        `VendorDrill`.`Payment_Vendor_Nbr` AS payment_vendor_nbr,
+        `VendorDrill`.`Merch_Vendor2` AS MERCH_VENDOR,
+        `VendorDrill`.`Week1` AS WEEK,
+        `VendorDrill`.`Category_2` AS CATEGORY,
         `VendorDrill`.`SKU_Nbr` AS SKU,
         concat('0', `VendorDrill`.`UPC_CD`) AS UPC,
-        `VendorDrill`.`Week1` AS week,
         `VendorDrill`.`d_Store_Nbr` AS STORENUMBER,
-        `VendorDrill`.`Sales_Units_before_Returns` AS sales_units_before_returns,
-        `VendorDrill`.`Sales__before_Returns` AS sales_$_before_returns,
+        `VendorDrill`.`Model_Number` AS MODEL_NUMBER,
+        `VendorDrill`.`store_weeks` AS STORE_WEEKS,
         `VendorDrill`.`Str_OH_units_wkly` AS STR_OH_UNITS_WKLY,
-        `VendorDrill`.`m_ty_Returns_sum` AS return_$,
-        `VendorDrill`.`m_ty_return_units_sum` AS return_units,
-        `VendorDrill`.`Sales__before_Returns` + `VendorDrill`.`m_ty_Returns_sum` AS sales_$,
-        `VendorDrill`.`store_weeks` AS STORE_WEEKS
+        `VendorDrill`.`Sales_Units_before_Returns` AS SALES_UNITS_BEFORE_RETURNS,
+        `VendorDrill`.`m_ty_return_units_sum` AS RETURN_UNITS,
+        `VendorDrill`.`Sales__before_Returns` AS SALES_$_BEFORE_RETURNS,
+        `VendorDrill`.`m_ty_Returns_sum` AS RETURN_$,
+        `VendorDrill`.`Sales__before_Returns` + `VendorDrill`.`m_ty_Returns_sum` AS SALES_$
         FROM `VendorDrill`.`VendorDrill` `VendorDrill`
         WHERE (`VendorDrill`.`Time_Calculations` IN ('Last WK'))
     """
@@ -186,35 +220,132 @@ def query_set_us_di():
     conn.close()
     return df
 
-def query_set_us_dom():
+def query_set_us_dom_last_week():
     conn = pyodbc.connect(f"DSN={Config.CLOUDERA_DSN_US_DOM_12582}", autocommit=True)
     query = """
-        SELECT date_format(current_date, 'MM/dd/yyyy') AS PROCESSTIME,
-        SUBSTR(`VendorDrill`.`Short_Week`, (-1)*6) AS FORECASTPERIOD,
-        `VendorDrill`.`Class1` AS category,
-        `VendorDrill`.`Merch_Vendor2` AS MERCH_VENDOR,
+        SELECT 
+        date_format(current_date, 'MM/dd/yyyy') AS PROCESSTIME,
+        SUBSTR(`VendorDrill`.`Short_Week`, -6) AS FORECASTPERIOD,
+        `VendorDrill`.`Payment_Vendor_Nbr` AS PAYMENT_VENDOR_NBR,
         `VendorDrill`.`Merch_Vendor_Nbr` AS MERCH_VENDOR_NBR,
-        `VendorDrill`.`Model_Number` AS model_number,
-        `VendorDrill`.`Payment_Vendor_Nbr` AS payment_vendor_nbr,
+        `VendorDrill`.`Merch_Vendor2` AS MERCH_VENDOR,
+        `VendorDrill`.`Week1` AS WEEK,
+        `VendorDrill`.`Category_2` AS CATEGORY,
         `VendorDrill`.`SKU_Nbr` AS SKU,
         concat('0', `VendorDrill`.`UPC_CD`) AS UPC,
-        `VendorDrill`.`Week1` AS week,
         `VendorDrill`.`d_Store_Nbr` AS STORENUMBER,
-        `VendorDrill`.`Sales_Units_before_Returns` AS sales_units_before_returns,
-        `VendorDrill`.`Sales__before_Returns` AS sales_$_before_returns,
+        `VendorDrill`.`Model_Number` AS MODEL_NUMBER,
+        `VendorDrill`.`store_weeks` AS STORE_WEEKS,
         `VendorDrill`.`Str_OH_units_wkly` AS STR_OH_UNITS_WKLY,
-        `VendorDrill`.`m_ty_Returns_sum` AS return_$,
-        `VendorDrill`.`m_ty_return_units_sum` AS return_units,
-        `VendorDrill`.`Sales__before_Returns` + `VendorDrill`.`m_ty_Returns_sum` AS sales_$,
-        `VendorDrill`.`m_store_count_avail` AS m_store_count_avail,
-        `VendorDrill`.`store_weeks` AS STORE_WEEKS
+        `VendorDrill`.`Sales_Units_before_Returns` AS SALES_UNITS_BEFORE_RETURNS,
+        `VendorDrill`.`m_ty_return_units_sum` AS RETURN_UNITS,
+        `VendorDrill`.`Sales__before_Returns` AS SALES_$_BEFORE_RETURNS,
+        `VendorDrill`.`m_ty_Returns_sum` AS RETURN_$,
+        `VendorDrill`.`Sales__before_Returns` + `VendorDrill`.`m_ty_Returns_sum` AS SALES_$
         FROM `VendorDrill`.`VendorDrill` `VendorDrill`
         WHERE (`VendorDrill`.`Time_Calculations` IN ('Last WK'))
-        """
+    """
     df = pd.read_sql(query, conn)
     conn.close()
     return df
 
+def query_set_ca_week_number(week_number):
+    conn = pyodbc.connect(f"DSN={Config.CLOUDERA_DSN_CA_14487}", autocommit=True)
+    if isinstance(week_number, list):
+        week_list_str = ', '.join(f"'{w}'" for w in week_number)
+    else:
+        week_list_str = f"'{week_number}'"
+    query = f"""
+        SELECT date_format(current_date, 'MM/dd/yyyy') AS PROCESSTIME,
+        substr(`CA_VENDORDRILL`.`h_sw_short_week`, -6) AS FORECASTPERIOD,
+        `CA_VENDORDRILL`.`h_v_payment_vendor_nbr` AS PAYMENT_VENDOR_NBR,
+        `CA_VENDORDRILL`.`h_v_merch_vendor_nbr` AS MERCH_VENDOR_NBR,
+        `CA_VENDORDRILL`.`h_v_vendor` AS MERCH_VENDOR,
+        `CA_VENDORDRILL`.`h_w_week` AS WEEK,
+        `CA_VENDORDRILL`.`d_mph_merch_dept` AS CATEGORY,
+        `CA_VENDORDRILL`.`d_v_article_nbr` AS SKU,
+        concat('0',`CA_VENDORDRILL`.`d_mph_upc`) AS UPC,
+        `CA_VENDORDRILL`.`d_mlh_store_nbr` AS STORENUMBER,
+        `CA_VENDORDRILL`.`d_mph_model_number` AS MODEL_NUMBER,
+        `CA_VENDORDRILL`.`m_store_weeks` AS STORE_WEEKS,
+        `CA_VENDORDRILL`.`m_str_oh_units_wkly` AS STR_OH_UNITS_WKLY,
+        `CA_VENDORDRILL`.`m_sales_units_before_returns` AS SALES_UNITS_BEFORE_RETURNS,
+        `CA_VENDORDRILL`.`m_return_units` AS RETURN_UNITS,
+        `CA_VENDORDRILL`.`m_sales_amount_before_returns` AS SALES_$_BEFORE_RETURNS,
+        `CA_VENDORDRILL`.`m_return_amount` AS RETURN_$,
+        `CA_VENDORDRILL`.`m_sales_amount_before_returns` + `CA_VENDORDRILL`.`m_return_amount` AS SALES_$
+        FROM `CA_VENDORDRILL`.`CA_VENDORDRILL` `CA_VENDORDRILL`
+       WHERE (`CA_VENDORDRILL`.`h_w_week` IN ({week_list_str}))
+    """
+    df = pd.read_sql(query, conn)
+    conn.close()
+    return df
+
+def query_set_us_di_week_number(week_number):
+    conn = pyodbc.connect(f"DSN={Config.CLOUDERA_DSN_US_DI_12746}", autocommit=True)
+    if isinstance(week_number, list):
+        week_list_str = ', '.join(f"'{w}'" for w in week_number)
+    else:
+        week_list_str = f"'{week_number}'"
+    query = f"""
+        SELECT 
+        date_format(current_date, 'MM/dd/yyyy') AS PROCESSTIME,
+        SUBSTR(`VendorDrill`.`Short_Week`, -6) AS FORECASTPERIOD,
+        `VendorDrill`.`Payment_Vendor_Nbr` AS PAYMENT_VENDOR_NBR,
+        `VendorDrill`.`Merch_Vendor_Nbr` AS MERCH_VENDOR_NBR,
+        `VendorDrill`.`Merch_Vendor2` AS MERCH_VENDOR,
+        `VendorDrill`.`Week1` AS WEEK,
+        `VendorDrill`.`Category_2` AS CATEGORY,
+        `VendorDrill`.`SKU_Nbr` AS SKU,
+        concat('0', `VendorDrill`.`UPC_CD`) AS UPC,
+        `VendorDrill`.`d_Store_Nbr` AS STORENUMBER,
+        `VendorDrill`.`Model_Number` AS MODEL_NUMBER,
+        `VendorDrill`.`store_weeks` AS STORE_WEEKS,
+        `VendorDrill`.`Str_OH_units_wkly` AS STR_OH_UNITS_WKLY,
+        `VendorDrill`.`Sales_Units_before_Returns` AS SALES_UNITS_BEFORE_RETURNS,
+        `VendorDrill`.`m_ty_return_units_sum` AS RETURN_UNITS,
+        `VendorDrill`.`Sales__before_Returns` AS SALES_$_BEFORE_RETURNS,
+        `VendorDrill`.`m_ty_Returns_sum` AS RETURN_$,
+        `VendorDrill`.`Sales__before_Returns` + `VendorDrill`.`m_ty_Returns_sum` AS SALES_$
+        FROM `VendorDrill`.`VendorDrill` `VendorDrill`
+        WHERE VendorDrill.week IN ({week_list_str})
+    """
+    df = pd.read_sql(query, conn)
+    conn.close()
+    return df
+
+def query_set_us_dom_week_number(week_number):
+    conn = pyodbc.connect(f"DSN={Config.CLOUDERA_DSN_US_DOM_12582}", autocommit=True)
+    if isinstance(week_number, list):
+        week_list_str = ', '.join(f"'{w}'" for w in week_number)
+    else:
+        week_list_str = f"'{week_number}'"
+    query = f"""
+        SELECT 
+        date_format(current_date, 'MM/dd/yyyy') AS PROCESSTIME,
+        SUBSTR(`VendorDrill`.`Short_Week`, -6) AS FORECASTPERIOD,
+        `VendorDrill`.`Payment_Vendor_Nbr` AS PAYMENT_VENDOR_NBR,
+        `VendorDrill`.`Merch_Vendor_Nbr` AS MERCH_VENDOR_NBR,
+        `VendorDrill`.`Merch_Vendor2` AS MERCH_VENDOR,
+        `VendorDrill`.`Week1` AS WEEK,
+        `VendorDrill`.`Category_2` AS CATEGORY,
+        `VendorDrill`.`SKU_Nbr` AS SKU,
+        concat('0', `VendorDrill`.`UPC_CD`) AS UPC,
+        `VendorDrill`.`d_Store_Nbr` AS STORENUMBER,
+        `VendorDrill`.`Model_Number` AS MODEL_NUMBER,
+        `VendorDrill`.`store_weeks` AS STORE_WEEKS,
+        `VendorDrill`.`Str_OH_units_wkly` AS STR_OH_UNITS_WKLY,
+        `VendorDrill`.`Sales_Units_before_Returns` AS SALES_UNITS_BEFORE_RETURNS,
+        `VendorDrill`.`m_ty_return_units_sum` AS RETURN_UNITS,
+        `VendorDrill`.`Sales__before_Returns` AS SALES_$_BEFORE_RETURNS,
+        `VendorDrill`.`m_ty_Returns_sum` AS RETURN_$,
+        `VendorDrill`.`Sales__before_Returns` + `VendorDrill`.`m_ty_Returns_sum` AS SALES_$
+        FROM `VendorDrill`.`VendorDrill` `VendorDrill`
+        WHERE VendorDrill.week IN ({week_list_str})
+    """
+    df = pd.read_sql(query, conn)
+    conn.close()
+    return df
 
 def get_all_users():
     query = """

@@ -6,22 +6,41 @@
 {% block content %}
 <div class="container-fluid text-center">
   <h4 class="text-center">Update Weekly POS Data</h4>
-  <h6>Last Updated Report Week: {{latest_week['reportstartingdate'].strftime('%m/%d/%Y')}} to {{latest_week['reportendingdate'].strftime('%m/%d/%Y')}}</h6>
+  <h6>Last Updated: {{latest_week['forecastweeklong']}} </h6>
+  <h6>Date from {{latest_week['reportstartingdate'].strftime('%m/%d/%Y')}} to {{latest_week['reportendingdate'].strftime('%m/%d/%Y')}}</h6>
  <ul class="list-group list-group-numbered">
  </ul>
   <ul class="list-group list-group-numbered">
     <li class="mb-5">
     <form method="post" action="{{ url_for('po.update_weekly_pos_data', query_id=1) }}">
+      <select name="week" id="week">
+        <option value="last_week">Last Week</option>
+        {% for week in canada_none_pos_week %}
+        <option value="{{week['forecastweeklong']}}">{{week['forecastweeklong']}}</option>
+        {% endfor %}
+      </select>
       <button class="btn btn-primary" type="submit">Update Weekly POS for HOMEDEPOT CANADA</button>
     </form>
   </li>
     <li class="mb-5">
     <form method="post" action="{{ url_for('po.update_weekly_pos_data', query_id=2) }}">
+        <select name="week" id="week">
+        <option value="last_week">Last Week</option>
+        {% for week in us_di_none_pos_week %}
+        <option value="{{week['forecastweeklong']}}">{{week['forecastweeklong']}}</option>
+        {% endfor %}
+      </select>
       <button class="btn btn-primary" type="submit">Update Weekly POS for HOMEDEPOT US DI</button>
     </form>
   </li>
     <li class="mb-5">
     <form method="post" action="{{ url_for('po.update_weekly_pos_data', query_id=3) }}">
+        <select name="week" id="week">
+        <option value="last_week">Last Week</option>
+        {% for week in us_dom_none_pos_week %}
+        <option value="{{week['forecastweeklong']}}">{{week['forecastweeklong']}}</option>
+        {% endfor %}
+      </select>
       <button class="btn btn-primary" type="submit">Update Weekly POS for HOMEDEPOT US DOM</button>
     </form>
   </li>
