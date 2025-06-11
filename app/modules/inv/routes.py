@@ -73,7 +73,7 @@ def upload_item_description():
                 df = pd.read_csv(save_path, header=0, delimiter=",", names=['item_number', 'description'], skip_blank_lines=True, skipinitialspace=True, engine='python')
                 data = df.to_html()
                 flash ('Your File has been uploaded successfully!!!', 'success')
-                return render_template('ont/update_item_description.html', data=data, file_name=file_name, user=user)
+                return render_template('inv/update_item_description.html', data=data, file_name=file_name, user=user)
             except Exception as e:
                 l_message = f"Error reading CSV File : {e}"
                 flash (l_message, 'error')

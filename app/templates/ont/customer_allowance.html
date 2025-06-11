@@ -1,0 +1,48 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h4 class="text-center">Customer Allowances</h4>
+  <hr>
+    {% if user_access['write_access'] == 'Y' %}
+  <div class="col-sm text-center">
+    <a href="{{url_for('ont.upload_customer_allowance')}}" class="mt-4"> <button class="btn btn-primary">Upload Customer
+        Allowances</button></a>
+    <a href="{{url_for('ont.new_allowance')}}"> <button class="btn btn-secondary">Add New Customer
+        Allowance</button></a>
+  </div>
+  <hr>
+  {% endif %}
+  <div class="table-responsive h600 overflow-auto">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Customer Number</th>
+          <th>Customer Name</th>
+          <th>Allowance %</th>
+          <th>Commission %</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for allowance in allowances %}
+        <tr>
+          <td>{{allowance.customer_number}}</td>
+          <td>{{allowance.customer_name}}</td>
+          <td>{{"{:.2f}".format(allowance.allowance)}}%</td>
+          <td>{{"{:.2f}".format(allowance.commission)}}%</td>
+          <td>
+            <a href="{{ url_for('ont.edit_allowance', customer_id=allowance.customer_id) }}"> <button class="btn btn-primary">Edit</button></a>
+            <a href="{{ url_for('ont.delete_allowance', customer_id=allowance.customer_id) }}" onclick="return confirm(`Confirm Delete Allowance for {{allowance.customer_name}}?`)"> <button class="btn btn-danger">Delete</button></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+</div>
+{% endblock %}

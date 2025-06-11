@@ -6,30 +6,42 @@
 {% block content %}
 
 <div class="container-fluid">
-    <hr>
-      <div class="row mb-30">
-          {% if user_access['read_access'] == 'Y' %}
-          <div class="col-sm text-center">
-            <a href="{{url_for('ont.orders')}}"><img src="{{url_for('static', filename='img/om.png')}}" alt=""><br/>Order Organizer</a>
-          </div>
-          {% endif %}
-          {% if user_access['write_access'] == 'Y' %}
-          <div class="col-sm text-center">
-              <a href="{{url_for('ont.upload_weekly_ad')}}"><img src="{{url_for('static', filename='img/ad.png')}}" alt=""><br/>Upload Weekly $ Ad Spent</a>
-          </div>
-          {% endif %}
-      </div>
-      <div class="row mb-30">
-        <div class="col-sm text-center">
-          
-        </div>
-        <div class="col-sm text-center">
-            
-        </div>
-        <div class="col-sm text-center">
-            
-        </div>
+  <hr>
+  <div class="row mb-30">
+    {% if user_access['read_access'] == 'Y' %}
+    <div class="col-sm text-center">
+      <a href="{{url_for('ont.orders')}}"><img src="{{url_for('static', filename='img/om.png')}}" alt=""><br />Order
+        Organizer</a>
     </div>
+    <div class="col-sm text-center">
+      <a href="{{url_for('ont.weekly_advertisement')}}"><img src="{{url_for('static', filename='img/ad.png')}}"
+          alt=""><br />Weekly Advertisement</a>
+    </div>
+    <div class="col-sm text-center">
+      <a href="{{url_for('ont.customer_allowance')}}"><img src="{{url_for('static', filename='img/allowance.png')}}"
+          alt=""><br />Customer Allowances</a>
+    </div>
+    {% endif %}
+
+  </div>
+  <div class="row mb-30">
+    <div class="col-sm text-center">
+      {% if user_access['read_access'] == 'Y' %}
+      <a href="{{url_for('ont.item_led_expense')}}"><img src="{{url_for('static', filename='img/led.png')}}"
+          alt=""><br />Item LED Expense</a>
+      {% endif %}
+    </div>
+
+    <div class="col-sm text-center">
+      {% if user_access['read_access'] == 'Y' %}
+      <a href="{{url_for('ont.item_comp_shop')}}"><img src="{{url_for('static', filename='img/compshop.png')}}"
+          alt=""><br />Item Comp Shop</a>
+      {% endif %}
+    </div>
+    <div class="col-sm text-center">
+
     </div>
   </div>
+</div>
+</div>
 {% endblock %}

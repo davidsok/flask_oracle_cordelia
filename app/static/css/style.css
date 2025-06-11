@@ -49,3 +49,11 @@
 #submit {
     padding: 10px 50px;
 }
+
+.h600{
+    height: 450px;
+}
+
+.overflow-auto{
+    overflow-y: auto;
+}

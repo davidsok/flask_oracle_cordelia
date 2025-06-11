@@ -1,0 +1,44 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h4 class="text-center">Item LED Expense</h4>
+  <hr>
+    {% if user_access['write_access'] == 'Y' %}
+  <div class="col-sm text-center">
+    <a href="" class="mt-4"> <button class="btn btn-primary">Upload New Item LED Expense</button></a>
+    <a href="{{url_for('ont.new_item_led_expense')}}"> <button class="btn btn-secondary">Add New Item LED Expense</button></a>
+  </div>
+  <hr>
+  {% endif %}
+  <div class="table-responsive h600 overflow-auto">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Item Number</th>
+          <th width="40%">Item Description</th>
+          <th>LED Expense %</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for expense in led_expenses %}
+        <tr>
+          <td>{{expense.item_number}}</td>
+          <td>{{expense.description}}</td>
+          <td>{{"{:.2f}".format(expense.led_expense)}}%</td>
+          <td>
+            <a href="{{url_for('ont.edit_item_led_expense', inventory_item_id=expense.inventory_item_id)}}"> <button class="btn btn-primary">Edit</button></a>
+            <a href="{{url_for('ont.delete_item_led_expense', inventory_item_id=expense.inventory_item_id)}}" onclick="return confirm(`Confirm Delete Item LED Expense for {{expense.item_number}}?`)"> <button class="btn btn-danger">Delete</button></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+</div>
+{% endblock %}

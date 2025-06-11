@@ -1,0 +1,22 @@
+<!-- templates/auth/register.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<h4 class="text-center">Add Item LED Expense</h4>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        Item Number: {{item_led_expense.item_number}}
+    </div>
+    <div class="form-group">
+        <label for="led_expense">{{ form.led_expense.label }}</label>
+        {{ form.led_expense(class="form-control") }}
+    </div>
+    <div class="form-group">
+        <a href="{{ url_for('ont.item_led_expense') }}"><div class="btn btn-secondary">Back</div> </a>
+        {{ form.submit(class="btn btn-primary btn-block") }}
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,26 @@
+<!-- templates/auth/register.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<h4 class="text-center">Add Customer Allowance</h4>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="customer">{{ form.customer.label }}</label>
+        {{ form.customer(class="form-control") }}
+    </div>
+    <div class="form-group">
+        <label for="allowance">{{ form.allowance.label }}</label>
+        {{ form.allowance(class="form-control") }}
+    </div>
+    <div class="form-group">
+        <label for="commission">{{ form.commission.label }}</label>
+        {{ form.commission(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.submit(class="btn btn-primary btn-block") }}
+    </div>
+</form>
+{% endblock %}

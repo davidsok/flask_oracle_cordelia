@@ -1,0 +1,18 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+    <h1>Your Uploaded Data</h1>
+
+    <h2>File Name: {{file_name}}.csv</h2>
+    {{ data | safe }}
+    <div class="mt-5">
+    <a href="/upload"><button class="btn btn-secondary">Back to Upload</button></a>
+    <a href="{{url_for('ont.update_item_comp_shop', file_name=file_name)}}"><button class="btn btn-primary">Update Item Comp Shop</button></a>
+    </div>
+    <hr>
+    <div>
+    </div>
+    {% endblock %}

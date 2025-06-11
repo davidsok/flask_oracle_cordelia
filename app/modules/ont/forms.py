@@ -12,3 +12,23 @@ class ItemInquiryForm(FlaskForm):
 class ItemInquiryForm2(FlaskForm):
     item_number = SelectField('Item Number', coerce=str, validators=[DataRequired()])
     submit = SubmitField('Find')
+
+class AddAllowanceForm(FlaskForm):
+    customer = SelectField('Customer', coerce=int, validators=[DataRequired()])
+    allowance = StringField('Allowance % (1% Enter 1)')
+    commission = StringField('Commission % (1% Enter 1)')
+    submit = SubmitField('Add')
+
+class EditAllowanceForm(FlaskForm):
+    allowance = StringField('Allowance % (1% Enter 1)')
+    commission = StringField('Commission % (1% Enter 1)')
+    submit = SubmitField('Update')
+
+class AddItemLEDExpenseForm(FlaskForm):
+    item = SelectField('Item', coerce=int, validators=[DataRequired()])
+    led_expense = StringField('LED Expense % (1% Enter 1)')
+    submit = SubmitField('Add')
+
+class EditItemLEDExpenseForm(FlaskForm):
+    led_expense = StringField('LED Expense % (1% Enter 1)')
+    submit = SubmitField('Update')

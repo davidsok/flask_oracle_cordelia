@@ -1,0 +1,41 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h4 class="text-center">Weekly Advertisement</h4>
+      {% if user_access['write_access'] == 'Y' %}
+          <div class="col-sm text-center">
+              <a href="{{url_for('ont.upload_weekly_ad')}}"> <button class="btn btn-primary">Upload New Weekly $ Ad Spent</button></a>
+          </div>
+    {% endif %}
+    <hr>
+  <div class="table-responsive h600 overflow-auto">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Item Number</th>
+          <th>Customer Number</th>
+          <th>Customer Name</th>
+          <th>Weekly Ad Amount</th>
+          <th>Date From - Date To</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ad in weekly_ads %}
+        <tr>
+          <td>{{ad.item_number}}</td>
+          <td>{{ad.customer_number}}</td>
+          <td>{{ad.customer_name}}</td>
+          <td>${{"{:.2f}".format(ad.weekly_ad_amount)}}</td>
+          <td>{{ad.date_from.strftime('%m/%d/%Y')}} - {{ad.date_to.strftime('%m/%d/%Y')}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+  </div>
+  {% endblock %}

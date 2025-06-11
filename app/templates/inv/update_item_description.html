@@ -4,13 +4,17 @@
 {% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
 
 {% block content %}
-    <h1>Your Data</h1>
+<h4>Your Uploaded Data</h4>
 
-    <h2>File Name: {{file_name}}.csv</h2>
-    {{ data | safe }}
-    <a href="{{url_for('inv.update_item_description', file_name=file_name)}}"><button>Update Description</button></a>
-    <a href="/upload"><button>Back to Upload</button></a>
-    <hr>
-    <div>
-    </div>
-    {% endblock %}
+<h6>File Name: {{file_name}}.csv</h6>
+{{ data | safe }}
+<div class="mt-5">
+    <a href="/upload"><button class="btn btn-secondary">Back to Upload</button></a>
+    <a href="{{url_for('inv.update_item_description', file_name=file_name)}}"><button class="btn btn-primary">Update
+            Description</button></a>
+
+</div>
+<hr>
+<div>
+</div>
+{% endblock %}
