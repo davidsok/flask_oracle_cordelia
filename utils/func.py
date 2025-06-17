@@ -9,3 +9,11 @@ def allowed_file(filename):
     print(Config.ALLOWED_EXTENSIONS)
     print(filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS)
     return filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
+
+def percentage_converter(x):
+    try:
+        if isinstance(x, str) and '%' in x:
+            return float(x.replace('%', '').strip()) / 100
+        return float(x)
+    except (ValueError, TypeError):
+        return None

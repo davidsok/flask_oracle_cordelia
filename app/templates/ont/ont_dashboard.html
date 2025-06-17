@@ -39,7 +39,10 @@
       {% endif %}
     </div>
     <div class="col-sm text-center">
-
+      {% if user_access['read_access'] == 'Y' %}
+      <a href="{{url_for('ont.customer_item_credit')}}"><img src="{{url_for('static', filename='img/credit.png')}}"
+          alt=""><br />Customer Item Credit Memo</a>
+      {% endif %}
     </div>
   </div>
 </div>

@@ -1,6 +1,7 @@
 from pickletools import read_uint1
 from flask import render_template, redirect, url_for, flash, session, request
 from app.modules.inv.forms import ItemInquiryForm, ItemInquiryForm2
+from app.modules.po.forms import PoInquiryForm
 from utils.breadcrumbs import register_breadcrumb
 from ...modules.po import po_bp
 from db import *
@@ -19,14 +20,24 @@ def po_dashboard():
     user_access = get_module_access_by_module_user(module_name='PO', user_id=session['user_id'])
     return render_template('po/po_dashboard.html', user_access = user_access, user=user)
 
-@po_bp.route('/inquiry')
+@po_bp.route('/inquiry', methods=['GET', 'POST'])
 @register_breadcrumb('PO Inquiry', url='/po/inquiry', parent='Purchase Order', parent_url='/po')
-def purchase_orders():
+def po_inquiry():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     user = get_user_by_id(session['user_id'])
     user_access = get_module_access_by_module_user(module_name='PO', user_id=session['user_id'])
-    return render_template('po/po_dashboard.html', user_access = user_access, user=user)
+    all_pos = get_all_po()
+    form = PoInquiryForm()
+    form.po_number.choices = list((po['po_header_id'], po['po_number']) for po in all_pos)
+    if form.validate_on_submit() and request.method == 'POST':
+        print(form.po_number.data)
+        po = get_po_by_number(po=form.po_number.data)
+        po_lines = get_po_lines_by_po(po_header_id=form.po_number.data)
+        print(po_lines)
+        return render_template('po/po_detail.html', user= user, po=po, po_lines=po_lines)
+
+    return render_template('po/po_inquiry.html', user_access = user_access, user=user, form=form)
 
 @po_bp.route('/weekly_pos')
 @register_breadcrumb('Weekly POS Data', url='/po/weekly_pos', parent='PO', parent_url='/po')

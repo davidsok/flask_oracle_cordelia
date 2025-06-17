@@ -1,0 +1,24 @@
+<!-- templates/auth/register.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<h4 class="text-center">Edit Customer Item Credit (CM)</h4>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group bold">
+        Customer:  {{item_credit.customer_number}} - {{item_credit.customer_name}}
+    </div>
+    <div class="form-group">
+        Item:  {{item_credit.item_number}}
+    </div>
+    <div class="form-group">
+        <label for="description">{{ form.cm.label }}</label>
+        {{ form.cm(class="form-control", step=0.01) }}
+    </div>
+    <div class="form-group">
+        {{ form.submit(class="btn btn-primary btn-block") }}
+    </div>
+</form>
+{% endblock %}

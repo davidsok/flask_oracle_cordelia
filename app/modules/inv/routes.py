@@ -32,8 +32,6 @@ def items():
         form.item_number.choices = list((item['inventory_item_id'], item['item_number']) for item in items)
     else:
         form = ItemInquiryForm()
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
     if form.validate_on_submit() and request.method == 'POST':
         get_item = get_item_detail(inventory_item_id=form.item_number.data)
         get_fg_oh_qty = get_inv_oh_qty(inventory_item_id=form.item_number.data, sub_inventory_code='FG')

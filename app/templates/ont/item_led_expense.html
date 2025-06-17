@@ -9,7 +9,7 @@
   <hr>
     {% if user_access['write_access'] == 'Y' %}
   <div class="col-sm text-center">
-    <a href="" class="mt-4"> <button class="btn btn-primary">Upload New Item LED Expense</button></a>
+    <a href="{{url_for('ont.upload_item_led_expense')}}" class="mt-4"> <button class="btn btn-primary">Re-Upload All Item LED Expense</button></a>
     <a href="{{url_for('ont.new_item_led_expense')}}"> <button class="btn btn-secondary">Add New Item LED Expense</button></a>
   </div>
   <hr>

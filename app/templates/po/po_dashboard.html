@@ -10,7 +10,7 @@
       <div class="row mb-30">
           {% if user_access['read_access'] == 'Y' %}
           <div class="col-sm text-center">
-            <a href="{{url_for('po.purchase_orders')}}"><img src="{{url_for('static', filename='img/po.png')}}" alt=""><br/>PO Inquiry</a>
+            <a href="{{url_for('po.po_inquiry')}}"><img src="{{url_for('static', filename='img/po.png')}}" alt=""><br/>PO Inquiry</a>
           </div>
           {% endif %}
           {% if user_access['write_access'] == 'Y' %}

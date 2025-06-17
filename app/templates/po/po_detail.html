@@ -1,0 +1,132 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <hr>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <tbody>
+        <tr><td colspan="3"><span class="danger">PO Number: {{po.po_number}}</span></td></tr>
+        <tr>
+          <td><span class="fw-bold">Created Date:</span> {{ po.creation_date.strftime("%m/%d/%Y %H:%M") }}</td>
+          <td><span class="fw-bold">PO Type:</span> {{ po.type }} </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><span class="fw-bold">Supplier:</span> {{ po.supplier }}</td>
+          <td><span class="fw-bold">Site:</span> {{ po.vendor_site_code }}</td>
+          <td><span class="fw-bold">Contact:</span></td>
+        </tr>
+        <tr>
+          <td><span class="fw-bold">Bill-to Location:</span> {{ po.bill_to_location }}</td>
+          <td><span class="fw-bold">Ship-to Location:</span> {{ po.ship_to_location }}</td>
+          <td><span class="fw-bold">Currency: </span>{{ po.currency_code }}</td>
+        </tr>
+        <tr>
+          <td><span class="fw-bold">Buyer:</span> {{ po.buyer }}</td>
+          <td><span class="fw-bold">Status:</span> {{ po.status }}</td>
+          <td><span class="fw-bold">Total: </span>${{"{:.2f}".format(po.total_amount) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <h6> </h6>
+  <div class="mt-3">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button"
+          role="tab" aria-controls="main" aria-selected="true">Lines</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button"
+          role="tab" aria-controls="inventory" aria-selected="false">Price Reference</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="po-tab" data-bs-toggle="tab" data-bs-target="#po" type="button" role="tab"
+          aria-controls="po" aria-selected="false">Reference Documents</button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Num</th>
+                <th>Type</th>
+                <th>Item</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>UOM</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              {% for line in po_lines %}
+              <tr>
+                <td>{{line.line_num}}</td>
+                <td>{{line.line_type}}</td>
+                <td>{{line.item_number}}</td>
+                <td>{{line.category}}</td>
+                <td>{{line.item_description}}</td>
+                <td>{{line.unit_meas_lookup_code}}</td>
+                <td>{{line.quantity}}</td>
+                <td>{{line.unit_price}}</td>
+                <td>${{"{:.2f}".format(line.amount) if line.amount else 0.00}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="inventory" role="tabpanel" aria-labelledby="inventory-tab">
+        <table class="table table-hover">
+          <thead>
+            <th>SubInv</th>
+            <th>Locator</th>
+            <th>On-hand Qty</th>
+            <th>Allocated Qty</th>
+            <th>Available Qty</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>FG</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane fade" id="po" role="tabpanel" aria-labelledby="po-tab">
+        <table class="table table-hover">
+          <thead>
+            <th>SubInv</th>
+            <th>Locator</th>
+            <th>On-hand Qty</th>
+            <th>Allocated Qty</th>
+            <th>Available Qty</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
