@@ -8,8 +8,10 @@
 
     <h2>File Name: {{file_name}}.csv</h2>
     {{ data | safe }}
-    <a href="{{url_for('ont.update_weekly_ad', file_name=file_name)}}"><button>Update Weekly Ad</button></a>
-    <a href="/upload"><button>Back to Upload</button></a>
+    <div class="mb-4">
+    <a href="{{url_for('po.update_po_price', file_name=file_name)}}"><button class="btn btn-primary">Update PO Factory Cost</button></a>
+    <a href="{{url_for('po.upload_po_price')}}"><button class="btn btn-secondary">Back to Upload</button></a>
+    </div>
     <hr>
     <div>
     </div>

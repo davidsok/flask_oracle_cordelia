@@ -78,7 +78,7 @@
                 <td>{{line.item_description}}</td>
                 <td>{{line.unit_meas_lookup_code}}</td>
                 <td>{{line.quantity}}</td>
-                <td>{{line.unit_price}}</td>
+                <td>${{"{:.2f}".format(line.unit_price) if line.unit_price else 0.00}}</td>
                 <td>${{"{:.2f}".format(line.amount) if line.amount else 0.00}}</td>
               </tr>
               {% endfor %}
