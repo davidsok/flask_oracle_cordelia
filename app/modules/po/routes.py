@@ -11,6 +11,7 @@ import pandas as pd
 from flask_cors import CORS
 from utils.func import *
 from datetime import datetime, date
+from werkzeug.utils import secure_filename
 
 @po_bp.route('/')
 @register_breadcrumb('Purchase Order', url='/po', parent='Home', parent_url='/')
@@ -123,92 +124,105 @@ def update_weekly_pos_data(query_id, *args, **kwargs):
             flash(f"Error: {str(e)}")
         return redirect(url_for('po.weekly_pos_data'))
 
-@po_bp.route('/price/upload', methods=['GET', 'POST'])
-@register_breadcrumb('Upload PO Cost Change', url='/po/price/upload', parent='Purchase Order', parent_url='/po')
+@po_bp.route('/factory_cost/upload', methods=['GET', 'POST'])
+@register_breadcrumb('Upload PO Factory Cost Change', url='/po/factory_cost/upload', parent='Purchase Order', parent_url='/po')
 def upload_po_price():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
+    
     user = get_user_by_id(session['user_id'])
+    
     if request.method == 'POST':
         if 'file' not in request.files:
-            return 'No file form!'
+            flash('No file form!', 'danger')
+            return render_template('ont/upload_po_price.html', user=user)
         file = request.files['file']
-        if not file or not hasattr(file, 'filename') or file.filename == '':
-            l_message = 'No file selected'
-            flash (l_message, 'error')
-        elif file and not allowed_file(file.filename):
-            l_message = 'Incorrect File Type, please select your CSV file'
-            flash (l_message, 'error')
-        
-        elif file and allowed_file(file.filename):
-            print('UPLOAD FOLDER ', Config.UPLOAD_FOLDER)
-            print('FILENAME', file.filename)
-            save_path = os.path.join(Config.UPLOAD_FOLDER, file.filename)
-            file_path = file.save(save_path)
-            print('FILEPATH : ', file_path)
-            file_name = os.path.splitext(file.filename)[0]
-            print('FILENAME : ', file_name)
-            try:   
-                df = pd.read_csv(save_path, header=0, delimiter=",", names=['po_number', 'vendor_site', 'item_number', 'factory_cost'], skip_blank_lines=True, skipinitialspace=True, engine='python')
+        if not file or file.filename == '':
+            flash('No file selected', 'danger')
+            return render_template('po/upload_po_price.html', user=user)
+        if not allowed_file(file.filename):
+            flash('Incorrect File Type, please select your CSV file', 'danger')
+            return render_template('po/upload_po_price.html', user=user)
+        # Create upload folder if it doesn't exist
+        os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+        # Generate a unique filename to avoid conflicts
+        filename = secure_filename(file.filename)
+        save_path = os.path.join(Config.UPLOAD_FOLDER, filename)
+        try:
+            # First attempt to save the file
+            file.save(save_path)
+            # Then attempt to read it
+            try:
+                df = pd.read_csv(
+                    save_path, 
+                    header=0, 
+                    delimiter=",", 
+                    names=['po_number', 'vendor_site', 'item_number', 'factory_cost'],
+                    na_filter=False,
+                    skip_blank_lines=True,
+                    skipinitialspace=True,
+                    engine='python'
+                )
                 data = df.to_html()
-                flash ('Your File has been uploaded successfully!!!', 'success')
-                return render_template('po/update_po_price.html', data=data, file_name=file_name, user=user)
+                bind = []
+                for row in df.iloc():
+                    print('ROW', row)
+
+                    bind.append({
+                        'po_number' : str(row.po_number), 
+                        'vendor_site' : str(row.vendor_site),
+                        'item_number' : str(row.item_number),
+                        'factory_cost' : float(row.factory_cost)
+                    })
+                table_name = "XXJWY.XXPO_PO_PRICE_CHANGE_STAGE"
+
+                # Insert new data to STAGING TABLE
+                insert_result = insert_records(table_name=table_name, delete_existing=True, data=bind)
+                if insert_result['status'] != 'success':
+                    flash(f"Insert failed: {insert_result['message']}", 'danger')
+                return redirect(url_for('po.edit_po_price'))
+                
+            except PermissionError as e:
+                flash(f"Error: The file is open in another program. Please close it and try again. Details: {str(e)}", 'danger')
+            except pd.errors.EmptyDataError:
+                flash("Error: The file is empty or not properly formatted", 'danger')
             except Exception as e:
-                l_message = f"Error reading CSV File : {e}"
-                flash (l_message, 'error')
-                return render_template('po/upload_po_price.html', data=None, file_name = file_name, user=user)
-        else:
-            l_message = f"Other error"
-            flash (l_message, 'error')
+                flash(f"Error processing CSV file: {str(e)}", 'danger')
+                
+        except PermissionError as e:
+            flash(f"Error: Cannot save file - it may be open in another program. Details: {str(e)}", 'error')
+        except Exception as e:
+            flash(f"Error saving file: {str(e)}", 'error')
     return render_template('po/upload_po_price.html', user=user)
 
-@po_bp.route('/price/update/<file_name>', methods=['GET', 'POST'])
-@register_breadcrumb('Update PO Cost', url='/po/price/update', parent='Purchase Order', parent_url='/po')
-def update_po_price(file_name):
+@po_bp.route('/factory_cost/update', methods=['GET', 'POST'])
+@register_breadcrumb('Upload PO Factory Cost', url='/po/factory_cost/upload', parent='Purchase Order', parent_url='/po')
+def update_po_price():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     user = get_user_by_id(session['user_id'])
-    file_path = get_file_path(file_name)
-    print(file_path)
-    try:   
-        df = pd.read_csv(file_path, header=0, delimiter=",", names=['po_number', 'vendor_site', 'item_number', 'factory_cost'], skip_blank_lines=True, skipinitialspace=True, engine='python')
+    conn = get_connection()
+    cursor = conn.cursor()
+    errbuff = cursor.var(cx_Oracle.STRING)
+    retcode = cursor.var(cx_Oracle.STRING)
+    cursor.callproc('XXCDL_PO_PRICE_UPDATE.MAIN', [errbuff, retcode])
+    conn.close()
+    # Use retcode: 0 = success, 2 = warning/error (Oracle standard)
+    code = retcode.getvalue()
+    message = errbuff.getvalue()
+    print('CODE - ', retcode, 'MESSAGE -', errbuff)
+    if code == 0 or code is None:
+        flash('Your PO Price has been updated successfully!', 'success')
+    else:
+        flash('Failed to update PO Price for reasons below!', 'danger')
+    data = get_po_price_change_stage()
+    return render_template('po/update_po_price.html', data=data, user=user)
 
-        print('DF', df)
-        bind = []
-        for row in df.iloc():
-            print('ROW', row)
-
-            bind.append({
-                'po_number' : str(row.po_number), 
-                'vendor_site' : str(row.vendor_site),
-                'item_number' : str(row.item_number),
-                'factory_cost' : float(row.factory_cost)
-            })
-        table_name = "XXJWY.XXPO_PO_PRICE_CHANGE_STAGE"
-
-        # Insert new data to STAGING TABLE
-        insert_result = insert_records(table_name=table_name, delete_existing=True, data=bind)
-        if insert_result['status'] != 'success':
-            flash(f"Insert failed: {insert_result['message']}", 'danger')
-        conn = get_connection()
-        cursor = conn.cursor()
-        errbuff = cursor.var(cx_Oracle.STRING)
-        retcode = cursor.var(cx_Oracle.NUMBER)
-        cursor.callproc('XXCDL_PO_PRICE_UPDATE.MAIN', [errbuff, retcode])
-        conn.close()
-        # Use retcode: 0 = success, 2 = warning/error (Oracle standard)
-        code = retcode.getvalue()
-        message = errbuff.getvalue()
-        if code == 0 or code is None:
-            flash('Your PO Price has been updated successfully!', 'success')
-        else:
-            flash(f'Failed to update PO Price. {message}', 'danger')
-            
-        return render_template('po/update_po_price.html', data={}, file_name=file_name, user=user)
-    except pd.errors.ParserError as e:
-        flash(f'CSV parsing error: {e}', 'danger')
-    except cx_Oracle.DatabaseError as e:
-        flash(f'Database error: {e}', 'danger')
-    except Exception as e:
-        flash(f'Unexpected error: {e}', 'danger')
-        return render_template('po/update_po_price.html', data={}, file_name=file_name, user=user)
+@po_bp.route('/factory_cost/edit', methods=['GET', 'POST'])
+@register_breadcrumb('Update PO Factory Cost', url='/po/factory_cost/edit', parent='Purchase Order', parent_url='/po')
+def edit_po_price():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    user = get_user_by_id(session['user_id'])
+    data = get_po_price_change_stage()
+    return render_template('po/update_po_price.html', data=data, user=user)

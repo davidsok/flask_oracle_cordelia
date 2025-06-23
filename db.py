@@ -1046,3 +1046,9 @@ def get_po_lines_by_po(po_header_id):
         AND POL.PO_HEADER_ID = :po_header_id
     """
     return execute_query(query=query, fetch='all', bind_vars=bind_vars)
+
+def get_po_price_change_stage():
+    query = """
+        SELECT * FROM XXPO_PO_PRICE_CHANGE_STAGE
+    """
+    return execute_query(query=query, fetch='all')

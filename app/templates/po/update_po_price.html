@@ -4,15 +4,46 @@
 {% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
 
 {% block content %}
-    <h1>Your Data</h1>
 
-    <h2>File Name: {{file_name}}.csv</h2>
-    {{ data | safe }}
-    <div class="mb-4">
-    <a href="{{url_for('po.update_po_price', file_name=file_name)}}"><button class="btn btn-primary">Update PO Factory Cost</button></a>
-    <a href="{{url_for('po.upload_po_price')}}"><button class="btn btn-secondary">Back to Upload</button></a>
-    </div>
+<div class="container-fluid">
+    <h4 class="text-center">PO Item Factory Cost Update</h4>
     <hr>
-    <div>
+    <div class="table-responsive h600 overflow-auto">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>PO Number</th>
+                    <th>Vendor Site</th>
+                    <th>Item Number</th>
+                    <th>Factory Cost</th>
+                    <th>Status</th>
+                    <th>Error Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td>{{item.po_number}}</td>
+                    <td>{{item.vendor_site}}</td>
+                    <td>{{item.item_number}}</td>
+                    <td>{% if item.factory_cost %} ${{"{:.2f}".format(item.factory_cost)}}{% endif %}</td>
+                    <td>{%if item.status%} {{item.status}} {% endif %}</td>
+                    <td>{%if item.error_message%} {{item.error_message}} {% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
     </div>
-    {% endblock %}
+</div>
+
+
+<div class="mb-4">
+    <a href="{{url_for('po.update_po_price')}}"><button class="btn btn-primary">Update PO Factory
+            Cost</button></a>
+    <a href="{{url_for('po.upload_po_price')}}"><button class="btn btn-secondary">Back to Upload</button></a>
+</div>
+<hr>
+<div>
+</div>
+{% endblock %}
