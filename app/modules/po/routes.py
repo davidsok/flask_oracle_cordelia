@@ -219,7 +219,7 @@ def update_po_price():
     return render_template('po/update_po_price.html', data=data, user=user)
 
 @po_bp.route('/factory_cost/edit', methods=['GET', 'POST'])
-@register_breadcrumb('Update PO Factory Cost', url='/po/factory_cost/edit', parent='Purchase Order', parent_url='/po')
+@register_breadcrumb('Edit PO Factory Cost', url='/po/factory_cost/upload', parent='Purchase Order', parent_url='/po')
 def edit_po_price():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
