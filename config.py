@@ -1,10 +1,10 @@
 import os
 
 class Config:
-    ORACLE_USER='APPS'
-    ORACLE_PASSWORD='APPS'
-    ORACLE_DSN='dev01.jimway.com:1532/TEST2'
-    SECRET_KEY='Cjw87mqF802y8imYeoUtNe2ha'
+    ORACLE_USER=''
+    ORACLE_PASSWORD=''
+    ORACLE_DSN=''
+    SECRET_KEY=''
     UPLOAD_FOLDER='uploads'
     ALLOWED_EXTENSIONS = ('csv')
     CLOUDERA_DSN_CA_14487 = 'DATA_CONNECTION_CA_14487'
