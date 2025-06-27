@@ -2,9 +2,9 @@ import re
 from flask import render_template, redirect, url_for, flash, session, request
 from flask_bcrypt import Bcrypt
 from utils.breadcrumbs import register_breadcrumb
-from ...modules.auth import auth_bp
-from ...modules.auth.forms import *
-from db import *
+from app.modules.auth import auth_bp
+from app.modules.auth.forms import *
+from app.modules.auth.repositories import *
 
 from app.modules import auth
 
@@ -16,7 +16,8 @@ def auth_dashboard():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     user = get_user_by_id(user_id=session['user_id'])
-    return render_template('auth/index.html' , user = user)
+    user_access = get_module_access_by_user(user_id=session['user_id'])
+    return render_template('auth/index.html' , user = user, user_access=user_access)
 
 @auth_bp.route('/admin', methods=['GET', 'POST'])
 @register_breadcrumb('Admin', url='/admin', parent='Home', parent_url='/')

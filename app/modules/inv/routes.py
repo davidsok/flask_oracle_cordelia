@@ -2,8 +2,9 @@ from pickletools import read_uint1
 from flask import render_template, redirect, url_for, flash, session, request
 from app.modules.inv.forms import ItemInquiryForm, ItemInquiryForm2
 from utils.breadcrumbs import register_breadcrumb
-from ...modules.inv import inv_bp
-from db import *
+from app.modules.inv import inv_bp
+from app.modules.inv.repositories import *
+from app.modules.auth.repositories import *
 import os
 import pandas as pd
 from flask_cors import CORS

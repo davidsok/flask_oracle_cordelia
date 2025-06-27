@@ -1,0 +1,19 @@
+<!-- templates/auth/register.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<h4 class="text-center">New Wishlist</h4>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="item">{{ form.name.label }}</label>
+        {{ form.name(class="form-control") }}
+    </div>
+    <div class="form-group">
+        <a href="{{ url_for('mk.wishlist') }}"><div class="btn btn-secondary btn-block">Back</div> </a>
+        {{ form.submit(class="btn btn-primary btn-block") }}
+    </div>
+</form>
+{% endblock %}

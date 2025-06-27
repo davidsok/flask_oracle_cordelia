@@ -1,0 +1,96 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+
+{% set start_page = (page - 2) if (page - 2) > 1 else 1 %}
+{% set end_page = (page + 2) if (page + 2) < total_pages else total_pages %}
+
+
+<h2 class="mb-4">Item Gallery</h2>
+
+<!-- <form method="POST" action="{{ url_for('mk.add_to_wishlist') }}"> -->
+  <div class="container">
+    {% for i in range(0, items|length, 4) %}
+      <div class="row mb-4">
+        {% for item in items[i:i+4] %}
+          <div class="col-md-3 col-sm-6 text-center">
+            <div class="card h-100">
+              <img src="{{ url_for('static', filename='img/items/' + item.item_number + '.png') }}"
+                   class="card-img-top img-fluid p-3"
+                   alt="{{ item.item_number }}"
+                   onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/default.png') }}';">
+              <div class="card-body">
+                <p class="card-text font-weight-bold">{{ item.item_number }}</p>
+                <!-- <div class="form-check text-center">
+                  <input class="form-check-input" type="checkbox" name="wishlist_items"
+                         value="{{ item.inventory_item_id }}" id="item{{ item.inventory_item_id }}">
+                  <label class="form-check-label" for="item{{ item.inventory_item_id }}">
+                    Add to Wishlist
+                  </label>
+                </div> -->
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- <div class="text-center my-4">
+    <button type="submit" class="btn btn-primary">Add Selected to Wishlist</button>
+  </div> -->
+<!-- </form> -->
+
+
+<nav aria-label="Item pagination">
+  <ul class="pagination justify-content-center">
+    
+    {# Previous #}
+    {% if page > 1 %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page - 1 }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Previous</span></li>
+    {% endif %}
+
+    {# Show first page and ellipsis if needed #}
+    {% if start_page > 1 %}
+      <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
+      {% if start_page > 2 %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+    {% endif %}
+
+    {# Main loop #}
+    {% for p in range(start_page, end_page + 1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+      </li>
+    {% endfor %}
+
+    {# Show ellipsis and last page if needed #}
+    {% if end_page < total_pages %}
+      {% if end_page < total_pages - 1 %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+      <li class="page-item"><a class="page-link" href="?page={{ total_pages }}">{{ total_pages }}</a></li>
+    {% endif %}
+
+    {# Next #}
+    {% if page < total_pages %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page + 1 }}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Next</span></li>
+    {% endif %}
+  </ul>
+</nav>
+
+
+
+{% endblock %}

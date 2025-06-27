@@ -5,6 +5,9 @@ from app.modules.inv.forms import ItemInquiryForm, ItemInquiryForm2
 from app.modules.ont.forms import AddAllowanceForm, AddCustomerItemCreditForm, AddItemCompShopForm, AddItemLEDExpenseForm, EditAllowanceForm, EditCustomerItemCreditForm, EditItemCompShopForm, EditItemLEDExpenseForm
 from utils.breadcrumbs import register_breadcrumb
 from ...modules.ont import ont_bp
+from app.modules.inv.repositories import *
+from app.modules.auth.repositories import *
+from app.modules.ont.repositories import *
 from db import *
 import os
 import pandas as pd

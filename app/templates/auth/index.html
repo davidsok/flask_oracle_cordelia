@@ -7,29 +7,41 @@
 <h6 class="text-center">Welcome to Cordelia Lighting Oracle Web App</h6>
 
 <div class="container-fluid">
-    <hr>
-      <div class="row mb-30">
-          <div class="col-sm text-center">
-            <a href="{{url_for('inv.inv_dashboard')}}"><img src="{{url_for('static', filename='img/inv.png')}}" alt=""><br/>Inventory</a>
-          </div>
-          <div class="col-sm text-center">
-              <a href="{{url_for('ont.ont_dashboard')}}"><img src="{{url_for('static', filename='img/om.png')}}" alt=""><br/>Order Management</a>
-          </div>
-          <div class="col-sm text-center">
-            <a href=""><img src="{{url_for('static', filename='img/ar.png')}}" alt=""><br/>Account Receivables</a>
-          </div>
+  <hr>
+  {% for i in range(0, user_access|length, 3) %}
+  <div class="row mb-4">
+    {% for access in user_access[i:i+3] %}
+      <div class="col-md-4 text-center mb-3">
+        {% if access.module_name == 'INV' %}
+          <a href="{{ url_for('inv.inv_dashboard') }}">
+            <img src="{{ url_for('static', filename='img/inv.png') }}" alt=""><br />Inventory
+          </a>
+        {% elif access.module_name == 'OM' %}
+          <a href="{{ url_for('ont.ont_dashboard') }}">
+            <img src="{{ url_for('static', filename='img/om.png') }}" alt=""><br />Order Management
+          </a>
+        {% elif access.module_name == 'AR' %}
+          <a href="#">
+            <img src="{{ url_for('static', filename='img/ar.png') }}" alt=""><br />Account Receivables
+          </a>
+        {% elif access.module_name == 'AP' %}
+          <a href="#">
+            <img src="{{ url_for('static', filename='img/ap.png') }}" alt=""><br />Account Payables
+          </a>
+        {% elif access.module_name == 'PO' %}
+          <a href="{{ url_for('po.po_dashboard') }}">
+            <img src="{{ url_for('static', filename='img/po.png') }}" alt=""><br />Purchase Orders
+          </a>
+        {% elif access.module_name == 'MK' %}
+          <a href="{{ url_for('mk.mk_dashboard') }}">
+            <img src="{{ url_for('static', filename='img/marketing.png') }}" alt=""><br />Marketing
+          </a>
+        {% endif %}
       </div>
-      <div class="row mb-30">
-        <div class="col-sm text-center">
-          <a href=""><img src="{{url_for('static', filename='img/ap.png')}}" alt=""><br/>Account Payables</a>
-        </div>
-        <div class="col-sm text-center">
-            <a href="{{url_for('po.po_dashboard')}}"><img src="{{url_for('static', filename='img/po.png')}}" alt=""><br/>Purchase Orders</a>
-        </div>
-        <div class="col-sm text-center">
-            
-        </div>
-    </div>
-    </div>
+    {% endfor %}
   </div>
+{% endfor %}
+
+</div>
+</div>
 {% endblock %}

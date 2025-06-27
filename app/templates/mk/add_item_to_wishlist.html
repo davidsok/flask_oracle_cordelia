@@ -1,0 +1,27 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <hr>
+  <h4 class="text-center">Wish List {{wishlist.name}}</h4>
+  <div class="row"></div>
+  <form method="POST" class="form-inline">
+    <div class="input-group">
+      <div class="input-group-addon">
+        <select class="form-control" name="item" multiple >
+          {% for item in items%}
+          <option value="{{item.inventory_item_id}}">{{item.item_number}}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <span class="input-group-btn">
+        <button type="submit" class="btn btn-primary">Add Selected</button>
+      </span>
+    </div>
+</div>
+</form>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+<!-- templates/auth/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Cordelia Lighting - Web App for Oracle{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h4 class="text-center">Wish List</h4>
+  <hr>
+  <div class="table-responsive h600 overflow-auto">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Wish List Number</th>
+          <th>Wish List Name</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for wish in wishlists %}
+        <tr>
+          <td>{{wish.wishlist_id}}</td>
+          <td>{{wish.name}}</td>
+          <td>
+            <a href="{{url_for('mk.edit_wishlist', wishlist_id = wish.wishlist_id)}}"> <button class="btn btn-secondary">Edit</button></a>
+            <a href="{{url_for('mk.add_item_to_wishlist', wishlist_id = wish.wishlist_id)}}"> <button class="btn btn-secondary">Add Items to Wishlist</button></a>
+            <a href="{{url_for('mk.edit_wishlist', wishlist_id = wish.wishlist_id)}}"> <button class="btn btn-secondary">Clear Wishlist</button></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+  {% if user_access['write_access'] == 'Y' %}
+  <div class="col-sm text-center">
+    <a href="{{url_for('mk.new_wishlist')}}"> <button class="btn btn-secondary">Add New Wishlist</button></a>
+  </div>
+  <hr>
+  {% endif %}
+</div>
+{% endblock %}
